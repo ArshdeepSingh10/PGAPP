@@ -3,20 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PG Management - Responsive Web & Mobile Platform</title>
+  <title>StayEase PG Management System</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     
     .toast-enter { transform: translateY(100%); opacity: 0; }
     .toast-show { transform: translateY(0); opacity: 1; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
   </style>
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen font-sans antialiased flex flex-col">
+<body class="bg-slate-100 text-slate-800 min-h-screen font-sans flex flex-col selection:bg-indigo-500 selection:text-white">
 
   <!-- TOAST NOTIFICATION -->
   <div id="toast" class="fixed top-5 right-5 z-50 max-w-md bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 toast-enter pointer-events-none border border-slate-700">
@@ -35,7 +34,7 @@
           <i class="fa-solid fa-building-user text-2xl"></i>
         </div>
         <h2 class="text-2xl font-black text-slate-800">StayEase PG</h2>
-        <p class="text-slate-500 text-xs mt-1">Smart PG Management & Rent Hub</p>
+        <p class="text-slate-500 text-xs mt-1">Smart PG Management & Rent Ecosystem</p>
       </div>
 
       <div class="flex bg-slate-100 p-1 rounded-xl text-xs font-bold">
@@ -53,14 +52,14 @@
           <input type="password" id="loginPass" required value="password" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
         </div>
         <div>
-          <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Default View</label>
+          <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Select Portal View</label>
           <select id="loginRole" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
             <option value="owner">PG Owner (Admin)</option>
             <option value="tenant">PG Tenant (User)</option>
           </select>
         </div>
         <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-indigo-200 text-xs transition">
-          Enter Dashboard
+          Enter Platform
         </button>
       </form>
 
@@ -92,7 +91,7 @@
   </div>
 
   <!-- MAIN APP INTERFACE -->
-  <div id="appLayout" class="hidden min-h-screen flex flex-col flex-1 pb-16 md:pb-0">
+  <div id="appLayout" class="hidden min-h-screen flex flex-col flex-1 pb-20 md:pb-0">
 
     <!-- TOP HEADER -->
     <header class="bg-indigo-600 text-white sticky top-0 z-40 shadow-md">
@@ -109,6 +108,14 @@
         </div>
 
         <div class="flex items-center gap-3">
+          <!-- Desktop Tabs Navigation -->
+          <div class="hidden md:flex items-center bg-indigo-900/40 p-1 rounded-xl text-xs font-bold gap-1">
+            <button onclick="changePage('home')" id="desktopNavHome" class="px-3 py-1.5 rounded-lg bg-white text-indigo-700 shadow">Home</button>
+            <button onclick="changePage('rooms')" id="desktopNavRooms" class="px-3 py-1.5 rounded-lg text-indigo-200 hover:text-white">Rooms</button>
+            <button onclick="changePage('approvals')" id="desktopNavApprovals" class="px-3 py-1.5 rounded-lg text-indigo-200 hover:text-white">Approvals</button>
+            <button onclick="changePage('reminders')" id="desktopNavReminders" class="px-3 py-1.5 rounded-lg text-indigo-200 hover:text-white">Reminders</button>
+          </div>
+
           <div class="bg-indigo-900/50 p-1 rounded-xl flex items-center border border-indigo-400/30 text-xs">
             <button id="btnRoleOwner" onclick="switchRole('owner')" class="px-3 py-1 rounded-lg bg-white text-indigo-700 font-bold shadow transition">Owner</button>
             <button id="btnRoleTenant" onclick="switchRole('tenant')" class="px-3 py-1 rounded-lg text-indigo-200 hover:text-white font-medium transition">Tenant</button>
@@ -122,12 +129,13 @@
       </div>
     </header>
 
-    <!-- MAIN BODY CONTENT -->
+    <!-- MAIN BODY CONTENT (PAGES) -->
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 custom-scrollbar">
 
-      <!-- OWNER VIEW -->
-      <div id="ownerView" class="space-y-6">
+      <!-- ================= PAGE 1: HOME (DASHBOARD WITH 5-ITEM LIMIT) ================= -->
+      <div id="pageHome" class="space-y-6 page-section">
         
+        <!-- Metrics Row -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
           <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
             <span class="text-[10px] font-bold uppercase text-slate-400">Total Rooms</span>
@@ -147,53 +155,97 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div class="lg:col-span-2 space-y-4" id="sectionRooms">
-            <div class="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          <!-- Dashboard Rooms Preview (Limit 5) -->
+          <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+            <div class="flex justify-between items-center">
               <div>
-                <h3 class="font-bold text-slate-800 text-sm md:text-base">Room Inventory</h3>
-                <p class="text-xs text-slate-500">Live bed capacity tracker</p>
+                <h3 class="font-bold text-slate-800 text-sm">Recent Rooms Overview</h3>
+                <p class="text-[11px] text-slate-400">Showing top 5 rooms on dashboard</p>
               </div>
-              <button onclick="openModal('addRoomModal')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-md shadow-indigo-200 transition">
-                <i class="fa-solid fa-plus"></i> Add Room
-              </button>
+              <button onclick="changePage('rooms')" class="text-xs text-indigo-600 font-bold hover:underline">View All Rooms →</button>
             </div>
-            <div id="roomListContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+            <div id="dashRoomList" class="space-y-3"></div>
           </div>
 
-          <div class="space-y-6">
-            <div id="sectionApprovals" class="bg-white p-4 md:p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-              <div class="flex justify-between items-center">
-                <h3 class="font-bold text-slate-800 text-sm">Payment Approvals</h3>
-                <span id="pendingCountBadge" class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full">0 Pending</span>
-              </div>
-              <div id="verificationQueueContainer" class="space-y-3 max-h-[300px] overflow-y-auto custom-scrollbar"></div>
-            </div>
-
-            <div id="sectionReminders" class="bg-white p-4 md:p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-              <h3 class="font-bold text-slate-800 text-sm">Rent Reminders</h3>
-              <div id="remindersContainer" class="space-y-3"></div>
-            </div>
-
-            <div class="bg-white p-4 md:p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3 text-xs">
-              <h3 class="font-bold text-slate-800 text-sm">Direct Payment Details</h3>
+          <!-- Dashboard Approvals Preview (Limit 5) -->
+          <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+            <div class="flex justify-between items-center">
               <div>
-                <label class="block font-bold text-slate-600 mb-1">Your UPI ID</label>
-                <input type="text" id="ownerUpiInput" value="9876543210@paytm" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono">
+                <h3 class="font-bold text-slate-800 text-sm">Recent Payment Approvals</h3>
+                <p class="text-[11px] text-slate-400">Showing top 5 pending verifications</p>
               </div>
-              <button onclick="saveOwnerUpi()" class="w-full bg-slate-800 text-white font-bold py-2.5 rounded-xl">Save Payment Info</button>
+              <button onclick="changePage('approvals')" class="text-xs text-indigo-600 font-bold hover:underline">View All Approvals →</button>
             </div>
+            <div id="dashApprovalList" class="space-y-3"></div>
           </div>
+
         </div>
 
       </div>
 
-      <!-- TENANT VIEW -->
-      <div id="tenantView" class="hidden space-y-6 max-w-3xl mx-auto">
+
+      <!-- ================= PAGE 2: ROOMS (FULL DETAILED TABLE) ================= -->
+      <div id="pageRooms" class="space-y-6 page-section hidden">
+        <div class="flex justify-between items-center bg-white p-5 rounded-3xl border border-slate-200 shadow-sm">
+          <div>
+            <h3 class="font-bold text-slate-800 text-base">Complete Room & Bed Directory</h3>
+            <p class="text-xs text-slate-500">Manage all rooms, sharing capacities, and bed assignments</p>
+          </div>
+          <button onclick="openModal('addRoomModal')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow-md shadow-indigo-200 transition">
+            <i class="fa-solid fa-plus"></i> Add New Room
+          </button>
+        </div>
+
+        <!-- Full Room Grid Table -->
+        <div id="fullRoomGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      </div>
+
+
+      <!-- ================= PAGE 3: APPROVALS (FULL TABLE) ================= -->
+      <div id="pageApprovals" class="space-y-6 page-section hidden">
+        <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="font-bold text-slate-800 text-base">All Payment Verification Requests</h3>
+              <p class="text-xs text-slate-500">Complete historical feed of tenant payment proofs</p>
+            </div>
+            <span id="fullApprovalCountBadge" class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full">0 Pending</span>
+          </div>
+
+          <div id="fullApprovalTable" class="space-y-3"></div>
+        </div>
+      </div>
+
+
+      <!-- ================= PAGE 4: REMINDERS & ALERTS ================= -->
+      <div id="pageReminders" class="space-y-6 page-section hidden">
+        <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+          <div>
+            <h3 class="font-bold text-slate-800 text-base">Rent Due Reminders & WhatsApp Triggers</h3>
+            <p class="text-xs text-slate-500">Send instant reminder alerts to tenants with upcoming due dates</p>
+          </div>
+
+          <div id="fullRemindersList" class="space-y-3"></div>
+
+          <div class="pt-4 border-t border-slate-100 space-y-3 text-xs">
+            <h4 class="font-bold text-slate-800">Owner Direct Payment UPI Settings</h4>
+            <div class="flex gap-2">
+              <input type="text" id="ownerUpiInput" value="9876543210@paytm" class="flex-1 p-2.5 bg-slate-50 border rounded-xl font-mono">
+              <button onclick="saveOwnerUpi()" class="bg-slate-800 text-white font-bold px-4 py-2.5 rounded-xl">Save UPI</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ================= TENANT VIEW (SPECIAL PORTAL) ================= -->
+      <div id="pageTenantPortal" class="space-y-6 page-section hidden max-w-3xl mx-auto">
         <div id="tenantStatusCard" class="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white p-5 md:p-6 rounded-3xl shadow-lg space-y-4"></div>
 
-        <div id="sectionPayRent" class="bg-white p-5 md:p-6 rounded-3xl border border-slate-200 shadow-sm space-y-5">
-          <h3 class="font-bold text-slate-800 text-base">Pay Rent Directly</h3>
+        <div class="bg-white p-5 md:p-6 rounded-3xl border border-slate-200 shadow-sm space-y-5">
+          <h3 class="font-bold text-slate-800 text-base">Pay Rent Directly to PG Owner</h3>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <a id="btnGpayLink" href="upi://pay?pa=9876543210@paytm&pn=PGOwner&am=6500&cu=INR" class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50 flex items-center justify-center gap-2 text-xs font-bold text-slate-700">
@@ -227,7 +279,7 @@
           </form>
         </div>
 
-        <div id="sectionTenantHistory" class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+        <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-4">
           <h3 class="font-bold text-slate-800 text-sm">Payment Receipts & History</h3>
           <div id="tenantHistoryContainer" class="space-y-2"></div>
         </div>
@@ -235,26 +287,26 @@
 
     </main>
 
-    <!-- MOBILE BOTTOM NAVIGATION FOOTER (VISIBLE ON MOBILE ONLY) -->
+    <!-- MOBILE & WEB BOTTOM NAVIGATION FOOTER -->
     <nav class="fixed bottom-0 inset-x-0 bg-white border-t border-slate-200 z-50 flex justify-around items-center py-2 px-1 md:hidden shadow-lg">
-      <button onclick="scrollToNav('top')" class="flex flex-col items-center text-indigo-600">
+      <button onclick="changePage('home')" id="footerNavHome" class="flex flex-col items-center text-indigo-600">
         <i class="fa-solid fa-house text-base"></i>
         <span class="text-[10px] mt-0.5 font-bold">Home</span>
       </button>
-      <button onclick="scrollToNav('rooms')" class="flex flex-col items-center text-slate-500 hover:text-indigo-600">
+      <button onclick="changePage('rooms')" id="footerNavRooms" class="flex flex-col items-center text-slate-400 hover:text-indigo-600">
         <i class="fa-solid fa-bed text-base"></i>
         <span class="text-[10px] mt-0.5 font-medium">Rooms</span>
       </button>
-      <button onclick="scrollToNav('approvals')" class="flex flex-col items-center text-slate-500 hover:text-indigo-600 relative">
+      <button onclick="changePage('approvals')" id="footerNavApprovals" class="flex flex-col items-center text-slate-400 hover:text-indigo-600 relative">
         <i class="fa-solid fa-clock-rotate-left text-base"></i>
         <span class="text-[10px] mt-0.5 font-medium">Approvals</span>
-        <span id="navBadge" class="absolute -top-1 right-2 w-2 h-2 bg-amber-500 rounded-full"></span>
+        <span id="footerBadge" class="absolute -top-1 right-1 w-2 h-2 bg-amber-500 rounded-full"></span>
       </button>
-      <button onclick="scrollToNav('reminders')" class="flex flex-col items-center text-slate-500 hover:text-indigo-600">
+      <button onclick="changePage('reminders')" id="footerNavReminders" class="flex flex-col items-center text-slate-400 hover:text-indigo-600">
         <i class="fa-solid fa-bell text-base"></i>
         <span class="text-[10px] mt-0.5 font-medium">Alerts</span>
       </button>
-      <button onclick="logout()" class="flex flex-col items-center text-slate-500 hover:text-red-500">
+      <button onclick="logout()" class="flex flex-col items-center text-slate-400 hover:text-red-500">
         <i class="fa-solid fa-right-from-bracket text-base"></i>
         <span class="text-[10px] mt-0.5 font-medium">Logout</span>
       </button>
@@ -305,17 +357,22 @@
     </div>
   </div>
 
-  <!-- JAVASCRIPT STATE ENGINE -->
+  <!-- JAVASCRIPT LOGIC & PAGE ROUTING ENGINE -->
   <script>
     let state = {
       role: 'owner',
+      currentPage: 'home',
       ownerUpi: '9876543210@paytm',
       rooms: [
         { id: 'r101', number: 'Room 101', capacity: 3, rent: 6500, beds: ['Rahul Sharma', 'Aman Verma', null] },
-        { id: 'r102', number: 'Room 102', capacity: 2, rent: 7500, beds: ['Vikram Kumar', 'Suresh Patel'] }
+        { id: 'r102', number: 'Room 102', capacity: 2, rent: 7500, beds: ['Vikram Kumar', 'Suresh Patel'] },
+        { id: 'r103', number: 'Room 103', capacity: 1, rent: 9000, beds: [null] },
+        { id: 'r104', number: 'Room 104', capacity: 3, rent: 6000, beds: [null, null, null] },
+        { id: 'r105', number: 'Room 105', capacity: 2, rent: 7000, beds: ['Amit Singh', null] }
       ],
       pendingPayments: [
-        { id: 'p1', tenantName: 'Rahul Sharma', roomNumber: 'Room 101', amount: 6500, method: 'UPI App', ref: 'UTR98234110', date: 'Just Now', status: 'Pending' }
+        { id: 'p1', tenantName: 'Rahul Sharma', roomNumber: 'Room 101', amount: 6500, method: 'UPI App', ref: 'UTR98234110', date: 'Just Now', status: 'Pending' },
+        { id: 'p2', tenantName: 'Amit Singh', roomNumber: 'Room 105', amount: 7000, method: 'Direct Transfer', ref: 'UTR88392019', date: '1 hr ago', status: 'Pending' }
       ],
       history: [
         { id: 'h1', tenantName: 'Rahul Sharma', month: 'Previous Month Rent', amount: 6500, date: '02 Oct 2026', status: 'Confirmed' }
@@ -323,15 +380,9 @@
       tenantUser: { name: 'Rahul Sharma', roomNumber: 'Room 101', sharingType: '3-Sharing', rentAmount: 6500, dueDate: '15th Nov', status: 'Unpaid' }
     };
 
-    window.addEventListener('DOMContentLoaded', renderAll);
-
-    function renderAll() {
-      renderMetrics();
-      renderRooms();
-      renderVerificationQueue();
-      renderReminders();
-      renderTenantView();
-    }
+    window.addEventListener('DOMContentLoaded', () => {
+      renderAll();
+    });
 
     function showToast(title, message, isError = false) {
       const toast = document.getElementById('toast');
@@ -346,12 +397,44 @@
       }, 3000);
     }
 
-    function scrollToNav(section) {
-      if (section === 'top') window.scrollTo({ top: 0, behavior: 'smooth' });
-      else if (section === 'rooms') document.getElementById('sectionRooms')?.scrollIntoView({ behavior: 'smooth' });
-      else if (section === 'approvals') document.getElementById(state.role === 'owner' ? 'sectionApprovals' : 'sectionPayRent')?.scrollIntoView({ behavior: 'smooth' });
-      else if (section === 'reminders') document.getElementById(state.role === 'owner' ? 'sectionReminders' : 'sectionTenantHistory')?.scrollIntoView({ behavior: 'smooth' });
-      showToast('Navigation', `Scrolled to ${section.toUpperCase()}`);
+    // MULTI-PAGE ROUTING SWITCHER
+    function changePage(pageId) {
+      state.currentPage = pageId;
+      
+      // Hide all pages
+      ['pageHome', 'pageRooms', 'pageApprovals', 'pageReminders', 'pageTenantPortal'].forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+      });
+
+      if (state.role === 'tenant') {
+        document.getElementById('pageTenantPortal').classList.remove('hidden');
+      } else {
+        if (pageId === 'home') document.getElementById('pageHome').classList.remove('hidden');
+        if (pageId === 'rooms') document.getElementById('pageRooms').classList.remove('hidden');
+        if (pageId === 'approvals') document.getElementById('pageApprovals').classList.remove('hidden');
+        if (pageId === 'reminders') document.getElementById('pageReminders').classList.remove('hidden');
+      }
+
+      // Update active styling on footers and desktop tabs
+      updateNavigationUI(pageId);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function updateNavigationUI(pageId) {
+      const navItems = ['Home', 'Rooms', 'Approvals', 'Reminders'];
+      navItems.forEach(item => {
+        const lower = item.toLowerCase();
+        const footerEl = document.getElementById(`footerNav${item}`);
+        const desktopEl = document.getElementById(`desktopNav${item}`);
+        
+        if (lower === pageId) {
+          if (footerEl) footerEl.className = "flex flex-col items-center text-indigo-600 font-bold";
+          if (desktopEl) desktopEl.className = "px-3 py-1.5 rounded-lg bg-white text-indigo-700 shadow font-bold";
+        } else {
+          if (footerEl) footerEl.className = "flex flex-col items-center text-slate-400 hover:text-indigo-600 font-medium";
+          if (desktopEl) desktopEl.className = "px-3 py-1.5 rounded-lg text-indigo-200 hover:text-white font-medium";
+        }
+      });
     }
 
     function switchAuthMode(mode) {
@@ -364,7 +447,7 @@
       document.getElementById('authScreen').classList.add('hidden');
       document.getElementById('appLayout').classList.remove('hidden');
       switchRole(document.getElementById('loginRole').value);
-      showToast('Welcome!', 'Logged in successfully.');
+      showToast('Welcome!', 'Successfully logged in.');
     }
 
     function logout() {
@@ -375,9 +458,27 @@
 
     function switchRole(role) {
       state.role = role;
-      document.getElementById('ownerView').classList.toggle('hidden', role !== 'owner');
-      document.getElementById('tenantView').classList.toggle('hidden', role === 'owner');
       document.getElementById('roleBadge').innerText = role === 'owner' ? "Owner Portal" : "Tenant Portal";
+      
+      if (role === 'tenant') {
+        document.getElementById('pageHome').classList.add('hidden');
+        document.getElementById('pageRooms').classList.add('hidden');
+        document.getElementById('pageApprovals').classList.add('hidden');
+        document.getElementById('pageReminders').classList.add('hidden');
+        document.getElementById('pageTenantPortal').classList.remove('hidden');
+      } else {
+        changePage('home');
+      }
+      renderAll();
+    }
+
+    function renderAll() {
+      renderMetrics();
+      renderDashboardsWithLimit();
+      renderFullRoomsTable();
+      renderFullApprovalsTable();
+      renderRemindersTable();
+      renderTenantView();
     }
 
     function renderMetrics() {
@@ -392,8 +493,49 @@
       document.getElementById('metricVacantBeds').innerText = totalCap - occupied;
     }
 
-    function renderRooms() {
-      const container = document.getElementById('roomListContainer');
+    // DASHBOARD VIEWS WITH LIMIT (SHOWS ONLY TOP 5)
+    function renderDashboardsWithLimit() {
+      // 1. Dash Rooms (Limit 5)
+      const dashRoomContainer = document.getElementById('dashRoomList');
+      dashRoomContainer.innerHTML = '';
+      state.rooms.slice(0, 5).forEach(room => {
+        let occ = room.beds.filter(b => b !== null).length;
+        dashRoomContainer.innerHTML += `
+          <div class="p-3 bg-slate-50 rounded-2xl border flex justify-between items-center text-xs">
+            <div>
+              <span class="font-bold text-indigo-600">${room.number}</span>
+              <p class="text-[10px] text-slate-500">${room.capacity}-Sharing • ₹${room.rent}/bed</p>
+            </div>
+            <span class="font-bold ${occ === room.capacity ? 'text-red-600' : 'text-emerald-600'}">${occ}/${room.capacity} Occupied</span>
+          </div>
+        `;
+      });
+
+      // 2. Dash Approvals (Limit 5)
+      const dashApprovalContainer = document.getElementById('dashApprovalList');
+      dashApprovalContainer.innerHTML = '';
+      let pending = state.pendingPayments.filter(p => p.status === 'Pending');
+      
+      if (pending.length === 0) {
+        dashApprovalContainer.innerHTML = `<p class="text-xs text-slate-400 italic text-center py-3">No pending approvals.</p>`;
+      } else {
+        pending.slice(0, 5).forEach(p => {
+          dashApprovalContainer.innerHTML += `
+            <div class="p-3 bg-slate-50 rounded-2xl border flex justify-between items-center text-xs">
+              <div>
+                <p class="font-bold text-slate-800">${p.tenantName} (${p.roomNumber})</p>
+                <p class="text-[10px] text-slate-400">Ref: ${p.ref}</p>
+              </div>
+              <button onclick="confirmPayment('${p.id}')" class="px-2.5 py-1 bg-emerald-600 text-white font-bold rounded-lg shadow-sm">Confirm ₹${p.amount}</button>
+            </div>
+          `;
+        });
+      }
+    }
+
+    // FULL ROOMS PAGE TABLE
+    function renderFullRoomsTable() {
+      const container = document.getElementById('fullRoomGrid');
       container.innerHTML = '';
       state.rooms.forEach(room => {
         let occupiedCount = room.beds.filter(b => b !== null).length;
@@ -402,19 +544,59 @@
             <span class="font-semibold">${bed}</span>
             <button onclick="removeTenant('${room.id}', ${idx})" class="text-slate-300 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button>
           </div>` :
-          `<button onclick="openAssignModal('${room.id}', ${idx})" class="p-2 rounded-xl bg-emerald-50 border border-dashed text-xs text-emerald-700 font-bold">+ Assign Bed</button>`
+          `<button onclick="openAssignModal('${room.id}', ${idx})" class="p-2 rounded-xl bg-emerald-50 border border-dashed text-xs text-emerald-700 font-bold hover:bg-emerald-100">+ Assign Bed</button>`
         ).join('');
 
         container.innerHTML += `
           <div class="bg-white p-4 rounded-2xl border shadow-sm space-y-3">
-            <div class="flex justify-between">
-              <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">${room.number}</span>
+            <div class="flex justify-between items-start">
+              <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-lg">${room.number}</span>
               <span class="text-[10px] font-bold text-slate-500">${room.capacity - occupiedCount} Available</span>
             </div>
+            <p class="text-xs text-slate-500">${room.capacity}-Sharing • ₹${room.rent}/bed</p>
             <div class="grid grid-cols-1 gap-2">${bedsHTML}</div>
           </div>
         `;
       });
+    }
+
+    // FULL APPROVALS PAGE TABLE
+    function renderFullApprovalsTable() {
+      const container = document.getElementById('fullApprovalTable');
+      let pending = state.pendingPayments.filter(p => p.status === 'Pending');
+      document.getElementById('fullApprovalCountBadge').innerText = `${pending.length} Pending`;
+      document.getElementById('footerBadge').style.display = pending.length > 0 ? 'block' : 'none';
+
+      container.innerHTML = pending.length ? pending.map(p => `
+        <div class="p-4 rounded-2xl border bg-slate-50 text-xs space-y-3">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="font-bold text-sm text-slate-800">${p.tenantName} — <span class="text-indigo-600">${p.roomNumber}</span></p>
+              <p class="text-[11px] text-slate-500">Method: ${p.method} • Ref: ${p.ref} • ${p.date}</p>
+            </div>
+            <span class="font-black text-base text-slate-800">₹${p.amount}</span>
+          </div>
+          <div class="flex justify-end gap-2 pt-2 border-t">
+            <button onclick="rejectPayment('${p.id}')" class="px-3 py-1.5 border border-red-200 text-red-600 font-bold rounded-lg hover:bg-red-50">Reject</button>
+            <button onclick="confirmPayment('${p.id}')" class="px-4 py-1.5 bg-emerald-600 text-white font-bold rounded-lg shadow-sm">Confirm Received</button>
+          </div>
+        </div>
+      `).join('') : '<p class="text-xs text-slate-400 text-center py-6">All payment requests have been verified.</p>';
+    }
+
+    // REMINDERS TABLE
+    function renderRemindersTable() {
+      document.getElementById('fullRemindersList').innerHTML = `
+        <div class="p-4 rounded-2xl border bg-slate-50 flex justify-between items-center text-xs">
+          <div>
+            <p class="font-bold text-slate-800 text-sm">Aman Verma (Room 101)</p>
+            <p class="text-xs text-amber-600 font-semibold mt-0.5">Rent Due in 2 Days (₹6,500)</p>
+          </div>
+          <a href="https://wa.me/919876543210?text=Hi%20Aman,%20this%20is%20a%20reminder%20that%20your%20PG%20rent%20is%20due%20soon." target="_blank" class="px-3 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold flex items-center gap-1.5 shadow-sm">
+            <i class="fa-brands fa-whatsapp text-emerald-600 text-base"></i> Send WhatsApp Reminder
+          </a>
+        </div>
+      `;
     }
 
     function handleAddRoom(e) {
@@ -425,7 +607,7 @@
       state.rooms.push({ id: 'r' + Date.now(), number: num, capacity: cap, rent: rent, beds: new Array(cap).fill(null) });
       closeModal('addRoomModal');
       renderAll();
-      showToast('Room Added', `${num} created.`);
+      showToast('Room Created', `${num} added to inventory.`);
     }
 
     function openAssignModal(roomId, bedIdx) {
@@ -443,69 +625,38 @@
       if (room) room.beds[bedIdx] = name;
       closeModal('assignTenantModal');
       renderAll();
-      showToast('Assigned', `${name} added to bed.`);
+      showToast('Bed Assigned', `${name} added to bed.`);
     }
 
     function removeTenant(roomId, bedIdx) {
       const room = state.rooms.find(r => r.id === roomId);
       if (room) room.beds[bedIdx] = null;
       renderAll();
-      showToast('Vacated', 'Bed freed up.');
-    }
-
-    function renderVerificationQueue() {
-      const container = document.getElementById('verificationQueueContainer');
-      let pending = state.pendingPayments.filter(p => p.status === 'Pending');
-      document.getElementById('pendingCountBadge').innerText = `${pending.length} Pending`;
-      container.innerHTML = pending.length ? pending.map(p => `
-        <div class="p-3 rounded-2xl border bg-slate-50 text-xs space-y-2">
-          <div class="flex justify-between">
-            <p class="font-bold">${p.tenantName} (${p.roomNumber})</p>
-            <span class="font-black">₹${p.amount}</span>
-          </div>
-          <div class="flex justify-end gap-1.5 pt-1">
-            <button onclick="rejectPayment('${p.id}')" class="px-2 py-1 border border-red-200 text-red-600 font-bold rounded-lg">Reject</button>
-            <button onclick="confirmPayment('${p.id}')" class="px-3 py-1 bg-emerald-600 text-white font-bold rounded-lg">Confirm</button>
-          </div>
-        </div>
-      `).join('') : '<p class="text-xs text-slate-400 text-center py-2">No pending verifications.</p>';
+      showToast('Bed Vacated', 'Bed freed up successfully.');
     }
 
     function confirmPayment(pId) {
       const item = state.pendingPayments.find(p => p.id === pId);
       if (item) {
         item.status = 'Confirmed';
+        state.pendingPayments = state.pendingPayments.filter(p => p.id !== pId);
         state.history.unshift({ id: 'h' + Date.now(), tenantName: item.tenantName, month: 'Current Rent', amount: item.amount, date: 'Today', status: 'Confirmed' });
         if (item.tenantName === state.tenantUser.name) state.tenantUser.status = 'Paid';
         renderAll();
-        showToast('Confirmed', 'Rent marked as received.');
+        showToast('Payment Confirmed', `Marked received for ${item.tenantName}`);
       }
     }
 
     function rejectPayment(pId) {
       state.pendingPayments = state.pendingPayments.filter(p => p.id !== pId);
       renderAll();
-      showToast('Rejected', 'Verification declined.', true);
-    }
-
-    function renderReminders() {
-      document.getElementById('remindersContainer').innerHTML = `
-        <div class="p-3 rounded-2xl border bg-slate-50 flex justify-between items-center text-xs">
-          <div>
-            <p class="font-bold">Aman Verma (Room 101)</p>
-            <p class="text-[10px] text-amber-600 font-semibold">Due in 2 Days (₹6,500)</p>
-          </div>
-          <a href="https://wa.me/919876543210?text=Rent%20Reminder" target="_blank" class="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 font-bold flex items-center gap-1">
-            <i class="fa-brands fa-whatsapp"></i> Remind
-          </a>
-        </div>
-      `;
+      showToast('Payment Rejected', 'Verification declined.', true);
     }
 
     function saveOwnerUpi() {
       state.ownerUpi = document.getElementById('ownerUpiInput').value;
       renderTenantView();
-      showToast('Saved', 'UPI details updated.');
+      showToast('UPI Updated', 'Direct payment address saved.');
     }
 
     function renderTenantView() {
@@ -513,16 +664,19 @@
       document.getElementById('tenantStatusCard').innerHTML = `
         <div class="flex justify-between items-start">
           <div>
-            <span class="text-[10px] bg-white/20 font-bold uppercase px-2 py-0.5 rounded">${t.roomNumber}</span>
-            <h2 class="text-xl font-black mt-1">₹${t.rentAmount}/mo</h2>
+            <span class="text-[10px] bg-white/20 font-bold uppercase px-2.5 py-1 rounded-lg">${t.roomNumber} (${t.sharingType})</span>
+            <h2 class="text-2xl font-black mt-2">₹${t.rentAmount} <span class="text-xs font-normal opacity-80">/ month</span></h2>
           </div>
-          <span class="bg-amber-300 text-slate-900 text-xs font-black px-2.5 py-1 rounded-full">${t.status}</span>
+          <span class="bg-amber-300 text-slate-900 text-xs font-black px-3 py-1 rounded-full">${t.status}</span>
         </div>
       `;
       document.getElementById('tenantDisplayUpi').innerText = state.ownerUpi;
       document.getElementById('tenantHistoryContainer').innerHTML = state.history.map(h => `
-        <div class="flex justify-between p-2.5 bg-slate-50 rounded-xl text-xs font-bold">
-          <span>${h.month}</span>
+        <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl text-xs font-bold">
+          <div>
+            <p>${h.month}</p>
+            <p class="text-[10px] text-slate-400 font-normal">${h.date}</p>
+          </div>
           <span class="text-emerald-600">₹${h.amount} ✓</span>
         </div>
       `).join('');
@@ -537,7 +691,7 @@
       });
       state.tenantUser.status = 'Pending Approval';
       renderAll();
-      showToast('Submitted', 'Proof sent to owner.');
+      showToast('Proof Submitted', 'Payment proof sent to owner.');
     }
 
     function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
