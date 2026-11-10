@@ -3,477 +3,388 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PG Management - Responsive Web & Mobile Platform</title>
+  <title>PG Management Mobile App</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-    
-    .toast-enter { transform: translateY(100%); opacity: 0; }
-    .toast-show { transform: translateY(0); opacity: 1; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen font-sans antialiased selection:bg-indigo-500 selection:text-white flex flex-col">
+<body class="bg-slate-900 text-slate-800 min-h-screen flex justify-center items-center p-0 sm:p-4 font-sans">
 
-  <!-- TOAST NOTIFICATION CONTAINER -->
-  <div id="toast" class="fixed bottom-5 right-5 z-50 max-w-md bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 toast-enter pointer-events-none border border-slate-700">
-    <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
-    <div>
-      <h4 id="toastTitle" class="font-bold text-xs uppercase tracking-wider text-slate-300">Notification</h4>
-      <p id="toastMessage" class="text-xs font-medium text-slate-100">Action performed successfully.</p>
-    </div>
-  </div>
+  <!-- Mobile Viewport Container -->
+  <div class="w-full max-w-[420px] h-[100vh] sm:h-[840px] bg-slate-50 sm:rounded-[36px] shadow-2xl flex flex-col overflow-hidden relative border-0 sm:border-8 sm:border-slate-800">
 
-  <!-- AUTH SCREEN CONTAINER -->
-  <div id="authScreen" class="min-h-screen w-full flex items-center justify-center p-4 bg-slate-900">
-    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 md:p-8 space-y-6">
-      <div class="text-center">
-        <div class="w-16 h-16 bg-indigo-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-indigo-200">
-          <i class="fa-solid fa-building-user text-2xl"></i>
-        </div>
-        <h2 class="text-2xl font-black text-slate-800">StayEase PG</h2>
-        <p class="text-slate-500 text-xs mt-1">Smart PG Management & Rent Ecosystem</p>
+    <!-- TOP CONTROL BAR (Role Toggle & Header) -->
+    <header id="appHeader" class="hidden bg-indigo-600 text-white p-4 pt-6 flex justify-between items-center shrink-0 shadow-md">
+      <div>
+        <h1 class="text-xs font-semibold text-indigo-200 uppercase tracking-wider">PG Portal</h1>
+        <p id="roleTitle" class="text-base font-bold">Owner Dashboard</p>
       </div>
-
-      <!-- Auth Tabs -->
-      <div class="flex bg-slate-100 p-1 rounded-xl text-xs font-bold">
-        <button id="tabLogin" onclick="switchAuthMode('login')" class="flex-1 py-2.5 rounded-lg bg-white shadow text-indigo-600 transition">Login</button>
-        <button id="tabRegister" onclick="switchAuthMode('register')" class="flex-1 py-2.5 rounded-lg text-slate-500 transition">Register</button>
-      </div>
-
-      <!-- LOGIN FORM -->
-      <form id="loginForm" onsubmit="handleAuth(event)" class="space-y-4">
-        <div>
-          <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Mobile / Email</label>
-          <input type="text" id="loginId" required value="9876543210" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
-        </div>
-        <div>
-          <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Password</label>
-          <input type="password" id="loginPass" required value="password" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
-        </div>
-        <div>
-          <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Default Role View</label>
-          <select id="loginRole" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-            <option value="owner">PG Owner (Admin)</option>
-            <option value="tenant">PG Tenant (User)</option>
-          </select>
-        </div>
-        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-indigo-200 text-xs transition">
-          Enter Dashboard
-        </button>
-      </form>
-
-      <!-- REGISTER FORM -->
-      <form id="registerForm" onsubmit="handleAuth(event)" class="space-y-4 hidden">
-        <div>
-          <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Full Name</label>
-          <input type="text" required placeholder="John Doe" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs">
-        </div>
-        <div>
-          <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Account Role</label>
-          <div class="grid grid-cols-2 gap-2">
-            <label class="flex items-center justify-center p-2.5 border rounded-xl bg-indigo-50 border-indigo-200 text-indigo-700 text-xs font-bold cursor-pointer">
-              <input type="radio" name="regRole" value="owner" checked class="mr-2"> PG Owner
-            </label>
-            <label class="flex items-center justify-center p-2.5 border rounded-xl bg-slate-50 text-slate-600 text-xs font-bold cursor-pointer">
-              <input type="radio" name="regRole" value="tenant" class="mr-2"> Tenant
-            </label>
-          </div>
-        </div>
-        <div>
-          <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Mobile Number</label>
-          <input type="tel" required placeholder="9876543210" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs">
-        </div>
-        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-indigo-200 text-xs transition">
-          Create Free Account
-        </button>
-      </form>
-
-      <p class="text-center text-[11px] text-slate-400">100% Free PG Management • Direct UPI Payments</p>
-    </div>
-  </div>
-
-  <!-- MAIN APP INTERFACE (HIDDEN BY DEFAULT) -->
-  <div id="appLayout" class="hidden min-h-screen flex flex-col flex-1">
-
-    <!-- TOP HEADER -->
-    <header class="bg-indigo-600 text-white sticky top-0 z-40 shadow-md">
-      <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-        
-        <div class="flex items-center gap-3">
-          <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center">
-            <i class="fa-solid fa-building-user text-lg text-white"></i>
-          </div>
-          <div>
-            <h1 class="font-extrabold text-sm md:text-base leading-tight">StayEase PG Platform</h1>
-            <p id="roleBadge" class="text-[10px] text-indigo-200 font-semibold uppercase tracking-wider">Owner Portal</p>
-          </div>
-        </div>
-
-        <!-- Role Selector Toggle -->
-        <div class="flex items-center gap-3">
-          <div class="bg-indigo-900/50 p-1 rounded-xl flex items-center border border-indigo-400/30 text-xs">
-            <button id="btnRoleOwner" onclick="switchRole('owner')" class="px-3 py-1 rounded-lg bg-white text-indigo-700 font-bold shadow transition">
-              <i class="fa-solid fa-user-gear mr-1"></i> <span class="hidden sm:inline">Owner</span>
-            </button>
-            <button id="btnRoleTenant" onclick="switchRole('tenant')" class="px-3 py-1 rounded-lg text-indigo-200 hover:text-white font-medium transition">
-              <i class="fa-solid fa-user mr-1"></i> <span class="hidden sm:inline">Tenant</span>
-            </button>
-          </div>
-
-          <button onclick="logout()" title="Logout" class="w-9 h-9 bg-indigo-700 hover:bg-indigo-800 rounded-xl flex items-center justify-center text-indigo-200 hover:text-white transition">
-            <i class="fa-solid fa-right-from-bracket"></i>
-          </button>
-        </div>
-
+      <!-- Role Toggle Switch -->
+      <div class="flex items-center bg-indigo-800/60 p-1 rounded-full border border-indigo-400/30 text-xs font-medium">
+        <button id="btnRoleOwner" onclick="switchRole('owner')" class="px-3 py-1 rounded-full bg-white text-indigo-700 font-bold shadow-sm transition-all">Owner</button>
+        <button id="btnRoleTenant" onclick="switchRole('tenant')" class="px-3 py-1 rounded-full text-indigo-200 transition-all">Tenant</button>
       </div>
     </header>
 
-    <!-- MAIN BODY CONTENT -->
-    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 custom-scrollbar">
+    <!-- APP MAIN CONTENT AREA -->
+    <main class="flex-1 overflow-y-auto no-scrollbar relative bg-slate-50">
 
-      <!-- ==================== OWNER DASHBOARD VIEW ==================== -->
-      <div id="ownerView" class="space-y-6">
+      <!-- ==================== 1. LOGIN / REGISTER SCREEN ==================== -->
+      <section id="authScreen" class="p-6 flex flex-col justify-between min-h-full">
+        <div>
+          <div class="text-center my-8">
+            <div class="w-16 h-16 bg-indigo-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-indigo-200">
+              <i class="fa-solid font-bold text-2xl fa-building-user"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-slate-800">StayEase PG</h2>
+            <p class="text-slate-500 text-sm mt-1">Smart PG Management & Rent Hub</p>
+          </div>
+
+          <!-- Auth Tabs -->
+          <div class="flex bg-slate-200 p-1 rounded-xl mb-6 text-sm font-medium">
+            <button id="tabLogin" onclick="switchAuthMode('login')" class="flex-1 py-2 rounded-lg bg-white shadow-sm text-slate-800 font-semibold text-center transition">Login</button>
+            <button id="tabRegister" onclick="switchAuthMode('register')" class="flex-1 py-2 rounded-lg text-slate-500 text-center transition">Register</button>
+          </div>
+
+          <!-- LOGIN FORM -->
+          <form id="loginForm" onsubmit="handleAuth(event)" class="space-y-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Mobile Number</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 text-sm">+91</span>
+                <input type="tel" required placeholder="98765 43210" class="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Password</label>
+              <input type="password" required placeholder="••••••••" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <div class="flex items-center justify-between text-xs">
+              <label class="flex items-center text-slate-600">
+                <input type="checkbox" class="rounded text-indigo-600 mr-2"> Remember me
+              </label>
+              <a href="#" class="text-indigo-600 font-semibold">Forgot Password?</a>
+            </div>
+            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-indigo-200 transition text-sm">Login to Account</button>
+          </form>
+
+          <!-- REGISTER FORM (Hidden by default) -->
+          <form id="registerForm" onsubmit="handleAuth(event)" class="space-y-4 hidden">
+            <div>
+              <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Select Role</label>
+              <div class="grid grid-cols-2 gap-3">
+                <label class="flex items-center justify-center p-3 border-2 border-indigo-600 bg-indigo-50/50 rounded-xl cursor-pointer text-xs font-bold text-indigo-700">
+                  <input type="radio" name="regRole" value="owner" checked class="mr-2"> PG Owner
+                </label>
+                <label class="flex items-center justify-center p-3 border border-slate-200 bg-white rounded-xl cursor-pointer text-xs font-bold text-slate-600">
+                  <input type="radio" name="regRole" value="tenant" class="mr-2"> Tenant / Resident
+                </label>
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Full Name</label>
+              <input type="text" required placeholder="John Doe" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Mobile Number</label>
+              <input type="tel" required placeholder="98765 43210" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Create Password</label>
+              <input type="password" required placeholder="••••••••" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-indigo-200 transition text-sm">Create Account</button>
+          </form>
+        </div>
+
+        <p class="text-center text-xs text-slate-400 mt-6">100% Free PG Management • No Gateway Fees</p>
+      </section>
+
+      <!-- ==================== 2. OWNER VIEW ==================== -->
+      <section id="ownerView" class="hidden p-4 space-y-4 pb-20">
         
-        <!-- Metrics Row -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-            <div class="flex justify-between items-center text-slate-400 mb-2">
-              <span class="text-[10px] font-bold uppercase tracking-wider">Total Rooms</span>
-              <i class="fa-solid fa-door-closed text-indigo-500"></i>
-            </div>
-            <p id="metricTotalRooms" class="text-2xl font-black text-slate-800">0</p>
+        <!-- Metrics Banner -->
+        <div class="grid grid-cols-3 gap-2">
+          <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm text-center">
+            <p class="text-[10px] uppercase font-bold text-slate-400">Total Beds</p>
+            <p class="text-xl font-bold text-slate-800">12</p>
           </div>
-
-          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-            <div class="flex justify-between items-center text-slate-400 mb-2">
-              <span class="text-[10px] font-bold uppercase tracking-wider">Total Capacity</span>
-              <i class="fa-solid fa-bed text-indigo-500"></i>
-            </div>
-            <p id="metricTotalCapacity" class="text-2xl font-black text-slate-800">0 Beds</p>
+          <div class="bg-emerald-50 p-3 rounded-2xl border border-emerald-100 text-center">
+            <p class="text-[10px] uppercase font-bold text-emerald-600">Occupied</p>
+            <p class="text-xl font-bold text-emerald-700">9</p>
           </div>
-
-          <div class="bg-white p-4 rounded-2xl border border-emerald-100 shadow-sm">
-            <div class="flex justify-between items-center text-emerald-600 mb-2">
-              <span class="text-[10px] font-bold uppercase tracking-wider">Occupied Beds</span>
-              <i class="fa-solid fa-user-check"></i>
-            </div>
-            <p id="metricOccupiedBeds" class="text-2xl font-black text-emerald-600">0</p>
-          </div>
-
-          <div class="bg-white p-4 rounded-2xl border border-amber-100 shadow-sm">
-            <div class="flex justify-between items-center text-amber-600 mb-2">
-              <span class="text-[10px] font-bold uppercase tracking-wider">Vacant Beds</span>
-              <i class="fa-solid fa-user-plus"></i>
-            </div>
-            <p id="metricVacantBeds" class="text-2xl font-black text-amber-600">0</p>
+          <div class="bg-amber-50 p-3 rounded-2xl border border-amber-100 text-center">
+            <p class="text-[10px] uppercase font-bold text-amber-600">Vacant</p>
+            <p class="text-xl font-bold text-amber-700">3</p>
           </div>
         </div>
 
-        <!-- Main Content Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          
-          <!-- LEFT 2 COLUMNS: Room Inventory -->
-          <div class="lg:col-span-2 space-y-4">
-            <div class="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-              <div>
-                <h3 class="font-bold text-slate-800 text-sm md:text-base">Room & Bed Inventory</h3>
-                <p class="text-xs text-slate-500">Manage room capacity and track live bed availability</p>
-              </div>
-              <button onclick="openModal('addRoomModal')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-md shadow-indigo-200 transition">
-                <i class="fa-solid fa-plus"></i> Add Room
-              </button>
-            </div>
-
-            <!-- Dynamic Room Cards List -->
-            <div id="roomListContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <!-- Rendered via JS -->
-            </div>
-          </div>
-
-          <!-- RIGHT COLUMN: Verification & Reminders -->
-          <div class="space-y-6">
-            
-            <!-- Pending Verification Queue -->
-            <div class="bg-white p-4 md:p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-              <div class="flex justify-between items-center">
-                <h3 class="font-bold text-slate-800 text-sm">Payment Approvals</h3>
-                <span id="pendingCountBadge" class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full">0 Pending</span>
-              </div>
-
-              <div id="verificationQueueContainer" class="space-y-3 max-h-[350px] overflow-y-auto custom-scrollbar">
-                <!-- Rendered via JS -->
-              </div>
-            </div>
-
-            <!-- Due Rent Reminders -->
-            <div class="bg-white p-4 md:p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-              <h3 class="font-bold text-slate-800 text-sm">Rent Reminders</h3>
-              <div id="remindersContainer" class="space-y-3">
-                <!-- Rendered via JS -->
-              </div>
-            </div>
-
-            <!-- Owner Payment Details Setup -->
-            <div class="bg-white p-4 md:p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3 text-xs">
-              <h3 class="font-bold text-slate-800 text-sm">Owner Payment Setup</h3>
-              <div>
-                <label class="block font-bold text-slate-600 mb-1">Your UPI ID (For Direct Payments)</label>
-                <input type="text" id="ownerUpiInput" value="9876543210@paytm" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-              </div>
-              <button onclick="saveOwnerUpi()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-xl transition">
-                Save Payment Info
-              </button>
-            </div>
-
-          </div>
-
+        <!-- Room Inventory Header & Add Button -->
+        <div class="flex justify-between items-center pt-2">
+          <h3 class="font-bold text-slate-800 text-sm">Room Occupancy & Capacity</h3>
+          <button onclick="openModal('addRoomModal')" class="text-xs bg-indigo-600 text-white font-semibold px-3 py-1.5 rounded-lg shadow-sm flex items-center gap-1">
+            <i class="fa-solid fa-plus text-[10px]"></i> Add Room
+          </button>
         </div>
 
-      </div>
+        <!-- Rooms List Cards -->
+        <div class="space-y-3">
+          <!-- Room 101 Card -->
+          <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+            <div class="flex justify-between items-start">
+              <div>
+                <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">Room 101</span>
+                <p class="text-xs text-slate-500 mt-1">3-Sharing Room • ₹6,500/bed</p>
+              </div>
+              <span class="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">1 Bed Available</span>
+            </div>
+            <!-- Bed Indicators -->
+            <div class="grid grid-cols-3 gap-2 text-xs">
+              <div class="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+                <span class="truncate font-medium text-slate-700">Rahul M.</span>
+              </div>
+              <div class="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+                <span class="truncate font-medium text-slate-700">Aman S.</span>
+              </div>
+              <div class="p-2 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                <span class="truncate font-bold text-emerald-700">Empty</span>
+              </div>
+            </div>
+          </div>
 
+          <!-- Room 102 Card -->
+          <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+            <div class="flex justify-between items-start">
+              <div>
+                <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">Room 102</span>
+                <p class="text-xs text-slate-500 mt-1">2-Sharing Room • ₹7,500/bed</p>
+              </div>
+              <span class="text-[11px] font-semibold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">Fully Occupied</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <div class="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+                <span class="truncate font-medium text-slate-700">Vikram K.</span>
+              </div>
+              <div class="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+                <span class="truncate font-medium text-slate-700">Suresh P.</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
-      <!-- ==================== TENANT DASHBOARD VIEW ==================== -->
-      <div id="tenantView" class="hidden space-y-6 max-w-3xl mx-auto">
+        <!-- Payment Verification Queue -->
+        <div class="pt-2">
+          <div class="flex justify-between items-center mb-2">
+            <h3 class="font-bold text-slate-800 text-sm">Payment Verification Queue</h3>
+            <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full">2 Pending</span>
+          </div>
+
+          <div class="space-y-2">
+            <!-- Pending Item 1 -->
+            <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm space-y-2">
+              <div class="flex justify-between items-start">
+                <div>
+                  <p class="text-xs font-bold text-slate-800">Rahul Sharma (Room 101)</p>
+                  <p class="text-[11px] text-slate-400">Paid via UPI • Ref: UTR9823411</p>
+                </div>
+                <span class="font-bold text-sm text-slate-800">₹6,500</span>
+              </div>
+              <div class="flex items-center justify-between pt-1 border-t border-slate-50">
+                <button onclick="alert('Viewing Payment Proof Screenshot')" class="text-xs text-indigo-600 font-semibold flex items-center gap-1">
+                  <i class="fa-solid fa-image"></i> View Screenshot
+                </button>
+                <div class="flex gap-2">
+                  <button onclick="alert('Payment Rejected')" class="px-2.5 py-1 rounded-lg border border-red-200 text-red-600 text-xs font-bold">Reject</button>
+                  <button onclick="alert('Payment Confirmed & Receipt Sent!')" class="px-3 py-1 rounded-lg bg-emerald-600 text-white text-xs font-bold shadow-sm">Confirm</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rent Reminders (WhatsApp direct) -->
+        <div class="pt-2">
+          <h3 class="font-bold text-slate-800 text-sm mb-2">Upcoming Due Rent Reminders</h3>
+          <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+            <div class="flex justify-between items-center">
+              <div>
+                <p class="text-xs font-bold text-slate-800">Aman Verma (Room 101)</p>
+                <p class="text-[11px] text-amber-600 font-medium">Due in 2 Days (15th Nov)</p>
+              </div>
+              <a href="https://wa.me/919876543210?text=Hi%20Aman,%20this%20is%20a%20reminder%20that%20your%20PG%20rent%20of%20Rs.%206500%20is%20due%20soon.%20Please%20pay%20via%20UPI/Cash%20and%20upload%20proof." target="_blank" class="px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold flex items-center gap-1">
+                <i class="fa-brands fa-whatsapp text-emerald-600 text-sm"></i> Send Reminder
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Owner Settings: Payment Setup -->
+        <div class="pt-2">
+          <h3 class="font-bold text-slate-800 text-sm mb-2">Your Direct Payment Details</h3>
+          <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-3 text-xs">
+            <div>
+              <label class="block font-bold text-slate-600 mb-1">Your Mobile / UPI Number</label>
+              <input type="text" value="9876543210@paytm" class="w-full p-2.5 bg-slate-50 border rounded-xl font-mono text-slate-700">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-600 mb-1">Upload Static UPI QR Code</label>
+              <input type="file" class="w-full text-slate-500 text-xs file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:text-indigo-700 font-semibold">
+            </div>
+            <button onclick="alert('Payment Details Saved')" class="w-full bg-slate-800 text-white font-bold py-2 rounded-xl text-xs">Save Payment Info</button>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ==================== 3. TENANT VIEW ==================== -->
+      <section id="tenantView" class="hidden p-4 space-y-4 pb-20">
         
-        <!-- Status Banner -->
-        <div id="tenantStatusCard" class="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white p-5 md:p-6 rounded-3xl shadow-lg space-y-4">
-          <!-- Rendered via JS -->
+        <!-- Rent Due Alert Card -->
+        <div class="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white p-4 rounded-2xl shadow-md space-y-3">
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="text-[10px] bg-white/20 uppercase font-bold px-2 py-0.5 rounded-full tracking-wider">Room 101 (3-Sharing)</span>
+              <h2 class="text-xl font-extrabold mt-1">₹6,500 <span class="text-xs font-normal opacity-80">/ month</span></h2>
+            </div>
+            <span class="bg-amber-400 text-slate-900 text-[10px] font-bold px-2 py-1 rounded-md">Due in 2 Days</span>
+          </div>
+          <p class="text-xs opacity-90">Please ensure funds are ready. Pay directly below without extra fees.</p>
         </div>
 
-        <!-- Payment Options & Direct UPI Portal -->
-        <div class="bg-white p-5 md:p-6 rounded-3xl border border-slate-200 shadow-sm space-y-5">
+        <!-- Direct Zero-Gateway Payment Section -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+          <h3 class="font-bold text-slate-800 text-sm">Pay Rent directly to Owner</h3>
+
+          <!-- Method 1: App Redirect Buttons -->
           <div>
-            <h3 class="font-bold text-slate-800 text-base">Pay Rent directly to PG Owner</h3>
-            <p class="text-xs text-slate-500">100% Zero Fee • Instant verification via reference proof</p>
-          </div>
-
-          <!-- Direct UPI Action Links -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <a id="btnGpayLink" href="upi://pay?pa=9876543210@paytm&pn=PGOwner&am=6500&cu=INR" class="p-3.5 rounded-2xl border border-slate-200 hover:border-indigo-300 bg-slate-50 hover:bg-indigo-50/50 flex items-center justify-center gap-2.5 text-xs font-bold text-slate-700 transition">
-              <i class="fa-solid fa-mobile-screen-button text-indigo-600 text-base"></i> Open UPI / Google Pay
-            </a>
-            <a id="btnPhonePeLink" href="upi://pay?pa=9876543210@paytm&pn=PGOwner&am=6500&cu=INR" class="p-3.5 rounded-2xl border border-slate-200 hover:border-indigo-300 bg-slate-50 hover:bg-indigo-50/50 flex items-center justify-center gap-2.5 text-xs font-bold text-slate-700 transition">
-              <i class="fa-solid fa-building-columns text-purple-600 text-base"></i> Open PhonePe / Paytm
-            </a>
-          </div>
-
-          <!-- QR Code & Details -->
-          <div class="p-4 bg-slate-50 rounded-2xl border border-dashed border-slate-300 text-center space-y-2">
-            <p class="text-xs font-bold text-slate-700">Scan QR Code or Pay via UPI ID</p>
-            <div class="w-36 h-36 bg-white border border-slate-200 mx-auto rounded-xl flex items-center justify-center p-2 shadow-inner">
-              <i class="fa-solid fa-qrcode text-8xl text-slate-800"></i>
+            <p class="text-xs font-semibold text-slate-600 mb-2">Option A: Pay via UPI Apps (Instant Redirect)</p>
+            <div class="grid grid-cols-2 gap-2">
+              <a href="upi://pay?pa=9876543210@paytm&pn=PGOwner&am=6500&cu=INR" class="p-2.5 rounded-xl border border-slate-200 flex items-center justify-center gap-2 hover:bg-slate-50 text-xs font-bold text-slate-700">
+                <i class="fa-solid fa-mobile-screen-button text-indigo-600"></i> Google Pay / UPI
+              </a>
+              <a href="upi://pay?pa=9876543210@paytm&pn=PGOwner&am=6500&cu=INR" class="p-2.5 rounded-xl border border-slate-200 flex items-center justify-center gap-2 hover:bg-slate-50 text-xs font-bold text-slate-700">
+                <i class="fa-solid fa-building-columns text-purple-600"></i> PhonePe / Paytm
+              </a>
             </div>
-            <p class="text-xs font-mono font-bold text-slate-800">UPI ID: <span id="tenantDisplayUpi">9876543210@paytm</span></p>
           </div>
 
-          <!-- Proof Submission Form -->
-          <form onsubmit="handlePaymentSubmit(event)" class="pt-3 border-t border-slate-100 space-y-4">
-            <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Submit Payment Proof</h4>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label class="block text-[11px] font-bold text-slate-600 mb-1">Payment Method</label>
-                <select id="payMethod" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold">
-                  <option value="UPI QR / App">UPI App / QR</option>
-                  <option value="Direct Bank Transfer">Direct Bank Transfer</option>
-                  <option value="Cash">Cash Handed Over</option>
-                </select>
+          <div class="relative flex py-1 items-center">
+            <div class="flex-grow border-t border-slate-200"></div>
+            <span class="flex-shrink mx-2 text-[10px] text-slate-400 font-bold uppercase">OR</span>
+            <div class="flex-grow border-t border-slate-200"></div>
+          </div>
+
+          <!-- Method 2: QR Code Scan / Direct Bank -->
+          <div>
+            <p class="text-xs font-semibold text-slate-600 mb-2">Option B: Scan Owner QR Code or Cash</p>
+            <div class="p-3 bg-slate-50 rounded-xl border border-dashed border-slate-300 text-center space-y-2">
+              <!-- Mock QR -->
+              <div class="w-32 h-32 bg-white border border-slate-200 mx-auto rounded-lg flex items-center justify-center p-2 shadow-inner">
+                <i class="fa-solid fa-qrcode text-7xl text-slate-800"></i>
               </div>
-              <div>
-                <label class="block text-[11px] font-bold text-slate-600 mb-1">Transaction Ref / UTR / Cash Note</label>
-                <input type="text" id="payRef" required placeholder="e.g. UTR1092830192" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none">
-              </div>
+              <p class="text-[11px] font-mono text-slate-600">UPI ID: <strong>9876543210@paytm</strong></p>
             </div>
+          </div>
 
+          <!-- Upload Proof Form -->
+          <form onsubmit="event.preventDefault(); alert('Proof submitted! Owner will confirm shortly.');" class="pt-2 border-t border-slate-100 space-y-3">
+            <p class="text-xs font-bold text-slate-800">Submit Payment Proof to Owner</p>
             <div>
-              <label class="block text-[11px] font-bold text-slate-600 mb-1">Amount Paid (₹)</label>
-              <input type="number" id="payAmount" required value="6500" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none">
+              <label class="block text-[11px] text-slate-500 mb-1">Transaction Ref / UTR No.</label>
+              <input type="text" placeholder="e.g. 32918239120" required class="w-full p-2.5 border rounded-xl text-xs bg-slate-50 focus:outline-none">
             </div>
-
             <div>
-              <label class="block text-[11px] font-bold text-slate-600 mb-1">Attach Proof / Receipt Screenshot</label>
-              <input type="file" id="payProofFile" class="w-full text-xs text-slate-500 file:mr-2 file:py-2 file:px-3 file:rounded-xl file:border-0 file:bg-indigo-50 file:text-indigo-700 font-semibold cursor-pointer">
+              <label class="block text-[11px] text-slate-500 mb-1">Upload Payment Screenshot / Cash Receipt</label>
+              <input type="file" required class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:text-indigo-700 font-semibold">
             </div>
-
-            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-emerald-200 text-xs transition">
-              <i class="fa-solid fa-paper-plane mr-1"></i> Send Proof to Owner for Confirmation
+            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-md text-xs transition">
+              Submit Payment Proof
             </button>
           </form>
         </div>
 
-        <!-- Tenant Transaction History -->
-        <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-          <h3 class="font-bold text-slate-800 text-sm">Payment History & Status</h3>
-          <div id="tenantHistoryContainer" class="space-y-2">
-            <!-- Rendered via JS -->
+        <!-- Tenant History -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+          <h3 class="font-bold text-slate-800 text-sm">Recent Rent Receipts</h3>
+          <div class="space-y-2 text-xs">
+            <div class="flex justify-between items-center p-2 rounded-xl bg-slate-50">
+              <div>
+                <p class="font-bold text-slate-700">October Rent</p>
+                <p class="text-[10px] text-slate-400">Confirmed on Oct 02</p>
+              </div>
+              <span class="font-bold text-emerald-600">₹6,500 ✓</span>
+            </div>
           </div>
         </div>
 
-      </div>
+      </section>
 
     </main>
+
+    <!-- BOTTOM MOBILE NAVIGATION BAR -->
+    <nav id="appNav" class="hidden bg-white border-t border-slate-200 flex justify-around items-center p-2 text-xs font-medium shrink-0">
+      <button onclick="alert('Navigating to Home')" class="flex flex-col items-center text-indigo-600">
+        <i class="fa-solid fa-house text-base"></i>
+        <span class="text-[10px] mt-0.5">Home</span>
+      </button>
+      <button onclick="alert('Navigating to Rooms/Rent')" class="flex flex-col items-center text-slate-400 hover:text-slate-600">
+        <i class="fa-solid fa-bed text-base"></i>
+        <span class="text-[10px] mt-0.5">Rooms</span>
+      </button>
+      <button onclick="alert('Navigating to History')" class="flex flex-col items-center text-slate-400 hover:text-slate-600">
+        <i class="fa-solid fa-receipt text-base"></i>
+        <span class="text-[10px] mt-0.5">History</span>
+      </button>
+      <button onclick="logout()" class="flex flex-col items-center text-slate-400 hover:text-slate-600">
+        <i class="fa-solid fa-user text-base"></i>
+        <span class="text-[10px] mt-0.5">Logout</span>
+      </button>
+    </nav>
+
   </div>
 
-  <!-- MODAL: ADD ROOM -->
-  <div id="addRoomModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
-    <div class="bg-white w-full max-w-md rounded-3xl p-6 space-y-4 shadow-2xl">
-      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-        <h3 class="font-bold text-slate-800 text-sm">Add Room to PG Inventory</h3>
-        <button onclick="closeModal('addRoomModal')" class="text-slate-400 hover:text-slate-600 text-lg font-bold">&times;</button>
+  <!-- ADD ROOM MODAL (Owner Tool) -->
+  <div id="addRoomModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-end sm:items-center p-0 sm:p-4 z-50">
+    <div class="bg-white w-full max-w-[420px] rounded-t-3xl sm:rounded-3xl p-5 space-y-4 animate-slide-up">
+      <div class="flex justify-between items-center border-b pb-2">
+        <h3 class="font-bold text-slate-800 text-sm">Add New Room</h3>
+        <button onclick="closeModal('addRoomModal')" class="text-slate-400 text-lg font-bold">&times;</button>
       </div>
-
-      <form onsubmit="handleAddRoom(event)" class="space-y-3 text-xs">
+      <form onsubmit="event.preventDefault(); alert('Room Added Successfully!'); closeModal('addRoomModal');" class="space-y-3 text-xs">
         <div>
-          <label class="block font-bold text-slate-600 mb-1">Room Title / Number</label>
-          <input type="text" id="newRoomNumber" required placeholder="e.g. Room 104" class="w-full p-2.5 border rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          <label class="block font-bold text-slate-600 mb-1">Room Number / Title</label>
+          <input type="text" placeholder="e.g. Room 103" required class="w-full p-2.5 border rounded-xl bg-slate-50">
         </div>
         <div>
-          <label class="block font-bold text-slate-600 mb-1">Sharing Type (Max Capacity)</label>
-          <select id="newRoomCapacity" class="w-full p-2.5 border rounded-xl bg-slate-50 font-semibold">
-            <option value="1">1-Seater (Private)</option>
-            <option value="2">2-Sharing</option>
-            <option value="3" selected>3-Sharing</option>
-            <option value="4">4-Sharing</option>
+          <label class="block font-bold text-slate-600 mb-1">Sharing Capacity</label>
+          <select class="w-full p-2.5 border rounded-xl bg-slate-50">
+            <option>1-Seater (Private)</option>
+            <option>2-Sharing</option>
+            <option selected>3-Sharing</option>
+            <option>4-Sharing</option>
           </select>
         </div>
         <div>
           <label class="block font-bold text-slate-600 mb-1">Rent per Bed (₹ / month)</label>
-          <input type="number" id="newRoomRent" required placeholder="6500" value="6500" class="w-full p-2.5 border rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          <input type="number" placeholder="6500" required class="w-full p-2.5 border rounded-xl bg-slate-50">
         </div>
-        <div class="pt-2 flex gap-2">
-          <button type="button" onclick="closeModal('addRoomModal')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 rounded-xl transition">Cancel</button>
-          <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-md transition">Add Room</button>
-        </div>
+        <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl shadow-md">Save Room</button>
       </form>
     </div>
   </div>
 
-  <!-- MODAL: ASSIGN TENANT TO BED -->
-  <div id="assignTenantModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
-    <div class="bg-white w-full max-w-md rounded-3xl p-6 space-y-4 shadow-2xl">
-      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-        <h3 class="font-bold text-slate-800 text-sm">Assign Tenant to Empty Bed</h3>
-        <button onclick="closeModal('assignTenantModal')" class="text-slate-400 hover:text-slate-600 text-lg font-bold">&times;</button>
-      </div>
-
-      <form onsubmit="handleAssignTenant(event)" class="space-y-3 text-xs">
-        <input type="hidden" id="assignRoomId">
-        <input type="hidden" id="assignBedIndex">
-        <div>
-          <label class="block font-bold text-slate-600 mb-1">Tenant Full Name</label>
-          <input type="text" id="assignTenantName" required placeholder="e.g. Ramesh Kumar" class="w-full p-2.5 border rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-        </div>
-        <div>
-          <label class="block font-bold text-slate-600 mb-1">Mobile Number</label>
-          <input type="tel" id="assignTenantPhone" required placeholder="9876543210" class="w-full p-2.5 border rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-        </div>
-        <div class="pt-2 flex gap-2">
-          <button type="button" onclick="closeModal('assignTenantModal')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 rounded-xl transition">Cancel</button>
-          <button type="submit" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-md transition">Assign Bed</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-
-  <!-- DUMMY DATA & STATE REACTION SCRIPT -->
+  <!-- JAVASCRIPT FOR TOGGLES & INTERACTION -->
   <script>
-    // INITIAL DUMMY STATE
-    let state = {
-      role: 'owner', // 'owner' or 'tenant'
-      ownerUpi: '9876543210@paytm',
-      rooms: [
-        {
-          id: 'r101',
-          number: 'Room 101',
-          capacity: 3,
-          rent: 6500,
-          beds: ['Rahul Sharma', 'Aman Verma', null] // null = empty bed
-        },
-        {
-          id: 'r102',
-          number: 'Room 102',
-          capacity: 2,
-          rent: 7500,
-          beds: ['Vikram Kumar', 'Suresh Patel']
-        }
-      ],
-      pendingPayments: [
-        {
-          id: 'p1',
-          tenantName: 'Rahul Sharma',
-          roomNumber: 'Room 101',
-          amount: 6500,
-          method: 'UPI App',
-          ref: 'UTR98234110',
-          date: 'Just Now',
-          status: 'Pending'
-        }
-      ],
-      history: [
-        {
-          id: 'h1',
-          tenantName: 'Rahul Sharma',
-          month: 'Previous Month Rent',
-          amount: 6500,
-          date: '02 Oct 2026',
-          status: 'Confirmed'
-        }
-      ],
-      tenantUser: {
-        name: 'Rahul Sharma',
-        roomNumber: 'Room 101',
-        sharingType: '3-Sharing',
-        rentAmount: 6500,
-        dueDate: '15th Nov',
-        status: 'Unpaid' // 'Unpaid', 'Pending Approval', 'Paid'
-      }
-    };
+    let currentRole = 'owner';
 
-    // INIT
-    window.addEventListener('DOMContentLoaded', () => {
-      renderAll();
-    });
-
-    // RENDER FUNCTION
-    function renderAll() {
-      renderMetrics();
-      renderRooms();
-      renderVerificationQueue();
-      renderReminders();
-      renderTenantView();
-    }
-
-    // TOAST NOTIFICATION SYSTEM
-    function showToast(title, message, isError = false) {
-      const toast = document.getElementById('toast');
-      const toastTitle = document.getElementById('toastTitle');
-      const toastMessage = document.getElementById('toastMessage');
-      const toastIcon = document.getElementById('toastIcon');
-
-      toastTitle.innerText = title;
-      toastMessage.innerText = message;
-      
-      if (isError) {
-        toastIcon.className = "fa-solid fa-circle-xmark text-red-400 text-lg";
-      } else {
-        toastIcon.className = "fa-solid fa-circle-check text-emerald-400 text-lg";
-      }
-
-      toast.classList.remove('toast-enter');
-      toast.classList.add('toast-show');
-
-      setTimeout(() => {
-        toast.classList.remove('toast-show');
-        toast.classList.add('toast-enter');
-      }, 3000);
-    }
-
-    // AUTH SWITCH
     function switchAuthMode(mode) {
       const loginForm = document.getElementById('loginForm');
       const registerForm = document.getElementById('registerForm');
@@ -483,366 +394,63 @@
       if (mode === 'login') {
         loginForm.classList.remove('hidden');
         registerForm.classList.add('hidden');
-        tabLogin.className = "flex-1 py-2.5 rounded-lg bg-white shadow text-indigo-600 transition font-bold";
-        tabRegister.className = "flex-1 py-2.5 rounded-lg text-slate-500 transition font-bold";
+        tabLogin.classList.add('bg-white', 'shadow-sm', 'text-slate-800', 'font-semibold');
+        tabLogin.classList.remove('text-slate-500');
+        tabRegister.classList.remove('bg-white', 'shadow-sm', 'text-slate-800', 'font-semibold');
+        tabRegister.classList.add('text-slate-500');
       } else {
         loginForm.classList.add('hidden');
         registerForm.classList.remove('hidden');
-        tabRegister.className = "flex-1 py-2.5 rounded-lg bg-white shadow text-indigo-600 transition font-bold";
-        tabLogin.className = "flex-1 py-2.5 rounded-lg text-slate-500 transition font-bold";
+        tabRegister.classList.add('bg-white', 'shadow-sm', 'text-slate-800', 'font-semibold');
+        tabRegister.classList.remove('text-slate-500');
+        tabLogin.classList.remove('bg-white', 'shadow-sm', 'text-slate-800', 'font-semibold');
+        tabLogin.classList.add('text-slate-500');
       }
     }
 
     function handleAuth(e) {
       e.preventDefault();
-      const role = document.getElementById('loginRole').value;
       document.getElementById('authScreen').classList.add('hidden');
-      document.getElementById('appLayout').classList.remove('hidden');
-      switchRole(role);
-      showToast('Welcome Back!', 'Successfully logged in to StayEase.');
+      document.getElementById('appHeader').classList.remove('hidden');
+      document.getElementById('appNav').classList.remove('hidden');
+      switchRole('owner');
     }
 
-    function logout() {
-      document.getElementById('appLayout').classList.add('hidden');
-      document.getElementById('authScreen').classList.remove('hidden');
-      showToast('Logged Out', 'You have been safely logged out.');
-    }
-
-    // ROLE SWITCH
     function switchRole(role) {
-      state.role = role;
+      currentRole = role;
       const ownerView = document.getElementById('ownerView');
       const tenantView = document.getElementById('tenantView');
-      const roleBadge = document.getElementById('roleBadge');
+      const roleTitle = document.getElementById('roleTitle');
       const btnOwner = document.getElementById('btnRoleOwner');
       const btnTenant = document.getElementById('btnRoleTenant');
 
       if (role === 'owner') {
         ownerView.classList.remove('hidden');
         tenantView.classList.add('hidden');
-        roleBadge.innerText = "Owner Dashboard";
-        btnOwner.className = "px-3 py-1 rounded-lg bg-white text-indigo-700 font-bold shadow transition";
-        btnTenant.className = "px-3 py-1 rounded-lg text-indigo-200 hover:text-white font-medium transition";
+        roleTitle.innerText = "Owner Dashboard";
+        btnOwner.className = "px-3 py-1 rounded-full bg-white text-indigo-700 font-bold shadow-sm transition-all";
+        btnTenant.className = "px-3 py-1 rounded-full text-indigo-200 transition-all";
       } else {
         ownerView.classList.add('hidden');
         tenantView.classList.remove('hidden');
-        roleBadge.innerText = "Tenant Rent Portal";
-        btnTenant.className = "px-3 py-1 rounded-lg bg-white text-indigo-700 font-bold shadow transition";
-        btnOwner.className = "px-3 py-1 rounded-lg text-indigo-200 hover:text-white font-medium transition";
+        roleTitle.innerText = "Tenant Rent Portal";
+        btnTenant.className = "px-3 py-1 rounded-full bg-white text-indigo-700 font-bold shadow-sm transition-all";
+        btnOwner.className = "px-3 py-1 rounded-full text-indigo-200 transition-all";
       }
     }
 
-    // METRICS
-    function renderMetrics() {
-      let totalRooms = state.rooms.length;
-      let totalCap = 0;
-      let occupied = 0;
-
-      state.rooms.forEach(r => {
-        totalCap += parseInt(r.capacity);
-        r.beds.forEach(bed => {
-          if (bed !== null) occupied++;
-        });
-      });
-
-      document.getElementById('metricTotalRooms').innerText = totalRooms;
-      document.getElementById('metricTotalCapacity').innerText = `${totalCap} Beds`;
-      document.getElementById('metricOccupiedBeds').innerText = occupied;
-      document.getElementById('metricVacantBeds').innerText = totalCap - occupied;
+    function logout() {
+      document.getElementById('authScreen').classList.remove('hidden');
+      document.getElementById('appHeader').classList.add('hidden');
+      document.getElementById('ownerView').classList.add('hidden');
+      document.getElementById('tenantView').classList.add('hidden');
+      document.getElementById('appNav').classList.add('hidden');
     }
 
-    // RENDER ROOMS & BEDS
-    function renderRooms() {
-      const container = document.getElementById('roomListContainer');
-      container.innerHTML = '';
-
-      state.rooms.forEach(room => {
-        let occupiedCount = room.beds.filter(b => b !== null).length;
-        let isFull = occupiedCount === room.capacity;
-
-        let bedsHTML = room.beds.map((bed, idx) => {
-          if (bed !== null) {
-            return `
-              <div class="p-2 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
-                <div class="flex items-center gap-2 truncate">
-                  <span class="w-2.5 h-2.5 rounded-full bg-red-500 shrink-0"></span>
-                  <span class="font-semibold text-slate-700 truncate">${bed}</span>
-                </div>
-                <button onclick="removeTenant('${room.id}', ${idx})" title="Vacate Bed" class="text-slate-300 hover:text-red-500 p-1">
-                  <i class="fa-solid fa-xmark text-xs"></i>
-                </button>
-              </div>
-            `;
-          } else {
-            return `
-              <button onclick="openAssignModal('${room.id}', ${idx})" class="p-2 rounded-xl bg-emerald-50 border border-dashed border-emerald-300 hover:bg-emerald-100 flex items-center gap-2 text-xs text-emerald-700 font-bold transition">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span>
-                <span>+ Assign Bed</span>
-              </button>
-            `;
-          }
-        }).join('');
-
-        const card = document.createElement('div');
-        card.className = "bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3";
-        card.innerHTML = `
-          <div class="flex justify-between items-start">
-            <div>
-              <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-lg">${room.number}</span>
-              <p class="text-xs text-slate-500 mt-1 font-medium">${room.capacity}-Sharing • ₹${room.rent}/bed</p>
-            </div>
-            <span class="text-[10px] font-bold ${isFull ? 'text-red-600 bg-red-50' : 'text-emerald-600 bg-emerald-50'} px-2 py-0.5 rounded-full">
-              ${isFull ? 'Fully Occupied' : `${room.capacity - occupiedCount} Available`}
-            </span>
-          </div>
-          <div class="grid grid-cols-1 gap-2">
-            ${bedsHTML}
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    // ADD ROOM ACTION
-    function handleAddRoom(e) {
-      e.preventDefault();
-      const num = document.getElementById('newRoomNumber').value;
-      const cap = parseInt(document.getElementById('newRoomCapacity').value);
-      const rent = parseInt(document.getElementById('newRoomRent').value);
-
-      const newRoom = {
-        id: 'r' + Date.now(),
-        number: num,
-        capacity: cap,
-        rent: rent,
-        beds: new Array(cap).fill(null)
-      };
-
-      state.rooms.push(newRoom);
-      closeModal('addRoomModal');
-      renderAll();
-      showToast('Room Added', `${num} with capacity of ${cap} beds created.`);
-      document.getElementById('newRoomNumber').value = '';
-    }
-
-    // ASSIGN TENANT
-    function openAssignModal(roomId, bedIdx) {
-      document.getElementById('assignRoomId').value = roomId;
-      document.getElementById('assignBedIndex').value = bedIdx;
-      openModal('assignTenantModal');
-    }
-
-    function handleAssignTenant(e) {
-      e.preventDefault();
-      const roomId = document.getElementById('assignRoomId').value;
-      const bedIdx = parseInt(document.getElementById('assignBedIndex').value);
-      const name = document.getElementById('assignTenantName').value;
-
-      const room = state.rooms.find(r => r.id === roomId);
-      if (room) {
-        room.beds[bedIdx] = name;
-        closeModal('assignTenantModal');
-        renderAll();
-        showToast('Tenant Assigned', `${name} added to ${room.number}`);
-        document.getElementById('assignTenantName').value = '';
-        document.getElementById('assignTenantPhone').value = '';
-      }
-    }
-
-    // VACATE BED
-    function removeTenant(roomId, bedIdx) {
-      const room = state.rooms.find(r => r.id === roomId);
-      if (room) {
-        const tenantName = room.beds[bedIdx];
-        room.beds[bedIdx] = null;
-        renderAll();
-        showToast('Bed Vacated', `${tenantName} removed from ${room.number}`);
-      }
-    }
-
-    // VERIFICATION QUEUE
-    function renderVerificationQueue() {
-      const container = document.getElementById('verificationQueueContainer');
-      const badge = document.getElementById('pendingCountBadge');
-      container.innerHTML = '';
-
-      let pending = state.pendingPayments.filter(p => p.status === 'Pending');
-      badge.innerText = `${pending.length} Pending`;
-
-      if (pending.length === 0) {
-        container.innerHTML = `<p class="text-xs text-slate-400 italic text-center py-4">No pending payment verifications.</p>`;
-        return;
-      }
-
-      pending.forEach(p => {
-        const item = document.createElement('div');
-        item.className = "p-3 rounded-2xl border border-slate-200 bg-slate-50 space-y-2 text-xs";
-        item.innerHTML = `
-          <div class="flex justify-between items-start">
-            <div>
-              <p class="font-bold text-slate-800">${p.tenantName} (${p.roomNumber})</p>
-              <p class="text-[10px] text-slate-400">${p.method} • Ref: ${p.ref}</p>
-            </div>
-            <span class="font-black text-slate-800">₹${p.amount}</span>
-          </div>
-          <div class="flex items-center justify-between pt-2 border-t border-slate-200/60">
-            <button onclick="showToast('Viewing Proof', 'Dummy screenshot preview verified.')" class="text-[11px] text-indigo-600 font-bold flex items-center gap-1">
-              <i class="fa-solid fa-image"></i> View Receipt
-            </button>
-            <div class="flex gap-1.5">
-              <button onclick="rejectPayment('${p.id}')" class="px-2.5 py-1 rounded-lg border border-red-200 text-red-600 font-bold hover:bg-red-50 transition">Reject</button>
-              <button onclick="confirmPayment('${p.id}')" class="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition shadow-sm">Confirm</button>
-            </div>
-          </div>
-        `;
-        container.appendChild(item);
-      });
-    }
-
-    function confirmPayment(paymentId) {
-      const pIndex = state.pendingPayments.findIndex(p => p.id === paymentId);
-      if (pIndex !== -1) {
-        const item = state.pendingPayments[pIndex];
-        item.status = 'Confirmed';
-        
-        // Add to history
-        state.history.unshift({
-          id: 'h' + Date.now(),
-          tenantName: item.tenantName,
-          month: 'Current Rent',
-          amount: item.amount,
-          date: 'Today',
-          status: 'Confirmed'
-        });
-
-        // Update tenant state if matching
-        if (item.tenantName === state.tenantUser.name) {
-          state.tenantUser.status = 'Paid';
-        }
-
-        renderAll();
-        showToast('Payment Verified', `Rent confirmed for ${item.tenantName}`);
-      }
-    }
-
-    function rejectPayment(paymentId) {
-      const pIndex = state.pendingPayments.findIndex(p => p.id === paymentId);
-      if (pIndex !== -1) {
-        const item = state.pendingPayments[pIndex];
-        state.pendingPayments.splice(pIndex, 1);
-        
-        if (item.tenantName === state.tenantUser.name) {
-          state.tenantUser.status = 'Unpaid';
-        }
-
-        renderAll();
-        showToast('Payment Rejected', `Verification declined for ${item.tenantName}`, true);
-      }
-    }
-
-    // REMINDERS
-    function renderReminders() {
-      const container = document.getElementById('remindersContainer');
-      container.innerHTML = `
-        <div class="p-3 rounded-2xl border border-slate-100 bg-slate-50 flex justify-between items-center text-xs">
-          <div>
-            <p class="font-bold text-slate-800">Aman Verma (Room 101)</p>
-            <p class="text-[10px] text-amber-600 font-semibold">Due in 2 Days (₹6,500)</p>
-          </div>
-          <a href="https://wa.me/919876543210?text=Hi%20Aman,%20this%20is%20a%20reminder%20that%20your%20PG%20rent%20is%20due%20soon." target="_blank" onclick="showToast('WhatsApp Opened', 'Direct message trigger sent.')" class="px-2.5 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold flex items-center gap-1 hover:bg-emerald-100 transition">
-            <i class="fa-brands fa-whatsapp text-emerald-600"></i> Remind
-          </a>
-        </div>
-      `;
-    }
-
-    // SAVE OWNER UPI
-    function saveOwnerUpi() {
-      const upi = document.getElementById('ownerUpiInput').value;
-      state.ownerUpi = upi;
-      renderTenantView();
-      showToast('UPI Updated', `Direct payment address set to ${upi}`);
-    }
-
-    // TENANT VIEW RENDER
-    function renderTenantView() {
-      const statusCard = document.getElementById('tenantStatusCard');
-      const tenant = state.tenantUser;
-
-      let statusBadge = '';
-      if (tenant.status === 'Paid') {
-        statusBadge = `<span class="bg-emerald-400 text-slate-900 text-xs font-black px-3 py-1 rounded-full">✓ Rent Paid</span>`;
-      } else if (tenant.status === 'Pending Approval') {
-        statusBadge = `<span class="bg-amber-400 text-slate-900 text-xs font-black px-3 py-1 rounded-full">⏳ Approval Pending</span>`;
-      } else {
-        statusBadge = `<span class="bg-amber-300 text-slate-900 text-xs font-black px-3 py-1 rounded-full">Due in 2 Days</span>`;
-      }
-
-      statusCard.innerHTML = `
-        <div class="flex justify-between items-start">
-          <div>
-            <span class="text-[10px] bg-white/20 font-bold uppercase px-2.5 py-1 rounded-lg tracking-wider">${tenant.roomNumber} (${tenant.sharingType})</span>
-            <h2 class="text-2xl font-black mt-2">₹${tenant.rentAmount} <span class="text-xs font-normal opacity-80">/ month</span></h2>
-          </div>
-          ${statusBadge}
-        </div>
-        <p class="text-xs text-indigo-100">Resident: <strong>${tenant.name}</strong> • Next Due Date: <strong>${tenant.dueDate}</strong></p>
-      `;
-
-      // Update Links
-      const upiUrl = `upi://pay?pa=${state.ownerUpi}&pn=PGOwner&am=${tenant.rentAmount}&cu=INR`;
-      document.getElementById('btnGpayLink').href = upiUrl;
-      document.getElementById('btnPhonePeLink').href = upiUrl;
-      document.getElementById('tenantDisplayUpi').innerText = state.ownerUpi;
-
-      // Render History
-      const historyContainer = document.getElementById('tenantHistoryContainer');
-      historyContainer.innerHTML = '';
-
-      state.history.forEach(h => {
-        const item = document.createElement('div');
-        item.className = "flex justify-between items-center p-3 rounded-xl bg-slate-50 text-xs";
-        item.innerHTML = `
-          <div>
-            <p class="font-bold text-slate-700">${h.month}</p>
-            <p class="text-[10px] text-slate-400">${h.date}</p>
-          </div>
-          <span class="font-bold text-emerald-600">₹${h.amount} ✓</span>
-        `;
-        historyContainer.appendChild(item);
-      });
-    }
-
-    // SUBMIT PAYMENT PROOF ACTION
-    function handlePaymentSubmit(e) {
-      e.preventDefault();
-      const method = document.getElementById('payMethod').value;
-      const ref = document.getElementById('payRef').value;
-      const amount = document.getElementById('payAmount').value;
-
-      const newPending = {
-        id: 'p' + Date.now(),
-        tenantName: state.tenantUser.name,
-        roomNumber: state.tenantUser.roomNumber,
-        amount: parseInt(amount),
-        method: method,
-        ref: ref,
-        date: 'Just Now',
-        status: 'Pending'
-      };
-
-      state.pendingPayments.unshift(newPending);
-      state.tenantUser.status = 'Pending Approval';
-
-      renderAll();
-      showToast('Proof Submitted!', 'Payment proof sent to owner for verification.');
-      document.getElementById('payRef').value = '';
-    }
-
-    // MODAL HELPERS
     function openModal(id) {
       document.getElementById(id).classList.remove('hidden');
     }
+
     function closeModal(id) {
       document.getElementById(id).classList.add('hidden');
     }
